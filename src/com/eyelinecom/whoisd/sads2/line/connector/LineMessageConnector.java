@@ -2,7 +2,6 @@ package com.eyelinecom.whoisd.sads2.line.connector;
 
 import com.eyelinecom.whoisd.sads2.Protocol;
 import com.eyelinecom.whoisd.sads2.common.InitUtils;
-import com.eyelinecom.whoisd.sads2.common.SADSLogger;
 import com.eyelinecom.whoisd.sads2.common.SADSUrlUtils;
 import com.eyelinecom.whoisd.sads2.common.UrlUtils;
 import com.eyelinecom.whoisd.sads2.connector.SADSRequest;
@@ -10,7 +9,6 @@ import com.eyelinecom.whoisd.sads2.connector.SADSResponse;
 import com.eyelinecom.whoisd.sads2.connector.Session;
 import com.eyelinecom.whoisd.sads2.events.LinkEvent;
 import com.eyelinecom.whoisd.sads2.events.MessageEvent;
-import com.eyelinecom.whoisd.sads2.exception.NotFoundResourceException;
 import com.eyelinecom.whoisd.sads2.executors.connector.AbstractHTTPPushConnector;
 import com.eyelinecom.whoisd.sads2.executors.connector.ProfileEnabledMessageConnector;
 import com.eyelinecom.whoisd.sads2.executors.connector.SADSExecutor;
@@ -18,7 +16,6 @@ import com.eyelinecom.whoisd.sads2.input.AbstractInputType;
 import com.eyelinecom.whoisd.sads2.input.InputFile;
 import com.eyelinecom.whoisd.sads2.input.InputLocation;
 import com.eyelinecom.whoisd.sads2.line.api.types.LineCallback;
-import com.eyelinecom.whoisd.sads2.line.registry.LineServiceRegistry;
 import com.eyelinecom.whoisd.sads2.line.resource.LineApiImpl;
 import com.eyelinecom.whoisd.sads2.line.util.MarshalUtils;
 import com.eyelinecom.whoisd.sads2.profile.Profile;
@@ -233,8 +230,7 @@ public class LineMessageConnector extends HttpServlet {
     }
 
     private SessionManager getSessionManager(String serviceId) throws Exception {
-      final ServiceSessionManager serviceSessionManager =
-        (ServiceSessionManager) getResource("session-manager");
+      final ServiceSessionManager serviceSessionManager = getResource("session-manager");
       return serviceSessionManager.getSessionManager(LINE, serviceId);
     }
 
@@ -313,10 +309,6 @@ public class LineMessageConnector extends HttpServlet {
       rc.setMimeType("text/plain");
       rc.setData(body.getBytes());
       return rc;
-    }
-
-    private LineServiceRegistry getServiceRegistry() throws NotFoundResourceException {
-      return (LineServiceRegistry) getResource("line-service-registry");
     }
 
   }
