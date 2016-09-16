@@ -7,6 +7,7 @@ import com.eyelinecom.whoisd.sads2.common.UrlUtils;
 import com.eyelinecom.whoisd.sads2.connector.SADSRequest;
 import com.eyelinecom.whoisd.sads2.connector.SADSResponse;
 import com.eyelinecom.whoisd.sads2.connector.Session;
+import com.eyelinecom.whoisd.sads2.events.Event;
 import com.eyelinecom.whoisd.sads2.events.LinkEvent;
 import com.eyelinecom.whoisd.sads2.events.MessageEvent;
 import com.eyelinecom.whoisd.sads2.executors.connector.AbstractHTTPPushConnector;
@@ -232,6 +233,16 @@ public class LineMessageConnector extends HttpServlet {
     private SessionManager getSessionManager(String serviceId) throws Exception {
       final ServiceSessionManager serviceSessionManager = getResource("session-manager");
       return serviceSessionManager.getSessionManager(LINE, serviceId);
+    }
+
+    @Override
+    protected Profile getCachedProfile(LineCallback.Request req) {
+      return req.getProfile();
+    }
+
+    @Override
+    protected Event getEvent(LineCallback.Request req) {
+      return req.getEvent();
     }
 
     @Override
