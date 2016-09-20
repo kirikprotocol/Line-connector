@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import static com.eyelinecom.whoisd.sads2.content.attributes.AttributeReader.getAttributes;
 import static com.eyelinecom.whoisd.sads2.executors.connector.ProfileEnabledMessageConnector.ATTR_SESSION_PREVIOUS_PAGE_URI;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -77,8 +78,10 @@ public class LinePushInterceptor extends BlankInterceptor implements Initable {
 
         final boolean isNothingToSend = StringUtils.isBlank(text) && keyboard == null;
         if (!isNothingToSend) text = text.isEmpty() ? "." : text;
+
         final boolean shouldCloseSession =
-          keyboard == null && doc.getRootElement().elements("input").isEmpty();
+            keyboard == null && doc.getRootElement().elements("input").isEmpty() &&
+                !getAttributes(doc.getRootElement()).getBoolean("line.keep.session").or(false);
 
         final SessionManager sessionManager =
           this.sessionManager.getSessionManager(request.getProtocol(), serviceId);
