@@ -17,16 +17,11 @@ import com.eyelinecom.whoisd.sads2.line.registry.LineServiceRegistry;
 import com.eyelinecom.whoisd.sads2.line.registry.LineToken;
 import com.eyelinecom.whoisd.sads2.line.resource.LineApi;
 import com.eyelinecom.whoisd.sads2.session.ServiceSessionManager;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 import org.apache.commons.logging.Log;
 import org.dom4j.Document;
 
 import java.util.Collection;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import static com.eyelinecom.whoisd.sads2.content.attachments.Attachment.Type.fromString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;

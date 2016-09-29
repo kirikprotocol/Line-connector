@@ -1,6 +1,7 @@
 package com.eyelinecom.whoisd.sads2.line.api.types;
 
 import com.eyelinecom.whoisd.sads2.events.Event;
+import com.eyelinecom.whoisd.sads2.eventstat.LoggableExternalRequest;
 import com.eyelinecom.whoisd.sads2.profile.Profile;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -23,7 +24,7 @@ public class LineCallback {
     }
   }
 
-  public static class Request {
+  public static class Request implements LoggableExternalRequest {
 
     @JsonProperty(value = "content")
     private Content content;
@@ -100,6 +101,11 @@ public class LineCallback {
 
     public Location getLocation() {
       return content.location;
+    }
+
+    @Override
+    public Object getLoggableData() {
+      return this;
     }
   }
 
