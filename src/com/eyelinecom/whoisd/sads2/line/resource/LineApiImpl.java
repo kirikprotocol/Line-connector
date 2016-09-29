@@ -4,6 +4,8 @@ import com.eyelinecom.whoisd.sads2.common.HttpDataLoader;
 import com.eyelinecom.whoisd.sads2.common.HttpLoader;
 import com.eyelinecom.whoisd.sads2.common.Loader;
 import com.eyelinecom.whoisd.sads2.common.SADSInitUtils;
+import com.eyelinecom.whoisd.sads2.eventstat.DetailedStatLogger;
+import com.eyelinecom.whoisd.sads2.executors.connector.Context;
 import com.eyelinecom.whoisd.sads2.executors.connector.SADSInitializer;
 import com.eyelinecom.whoisd.sads2.line.api.types.LineContacts;
 import com.eyelinecom.whoisd.sads2.line.api.types.LineRequest;
@@ -22,11 +24,16 @@ public class LineApiImpl implements LineApi {
   private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(LineApiImpl.class);
 
   private final HttpDataLoader loader;
+  private final DetailedStatLogger detailedStatLogger;
   private final String connectorUrl;
   public static final String VIDEO_PREVIEW_IMAGE = "videoPreviewImage.jpg";
 
-  public LineApiImpl(HttpDataLoader loader, Properties properties) {
+  public LineApiImpl(HttpDataLoader loader,
+                     DetailedStatLogger detailedStatLogger,
+                     Properties properties) {
+
     this.loader = loader;
+    this.detailedStatLogger = detailedStatLogger;
     this.connectorUrl = properties.getProperty("connector.url");
   }
 
@@ -41,6 +48,10 @@ public class LineApiImpl implements LineApi {
   }
 
   private void sendEvent(LineRequest request, LineToken token) {
+    if (Context.getSadsRequest() != null) {
+      detailedStatLogger.onOuterResponse(Context.getSadsRequest(), request);
+    }
+
     try {
       String json = request.toJson();
       log.debug("Line send " + request.type() + " request: " + json);
@@ -123,7 +134,8 @@ public class LineApiImpl implements LineApi {
     @Override
     public Object build(String id, Properties properties, HierarchicalConfiguration config) throws Exception {
       final HttpDataLoader loader = SADSInitUtils.getResource("loader", properties);
-      return new LineApiImpl(loader, properties);
+      final DetailedStatLogger detailedStatLogger = SADSInitUtils.getResource("detailed-stat-logger", properties);
+      return new LineApiImpl(loader, detailedStatLogger, properties);
     }
 
     @Override
