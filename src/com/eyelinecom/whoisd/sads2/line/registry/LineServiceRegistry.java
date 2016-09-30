@@ -54,8 +54,9 @@ public class LineServiceRegistry extends ServiceConfigListener {
   }
 
   private void unregister(String serviceId) {
-    log.debug("unregistering " + serviceId);
-    serviceMap.remove(serviceId);
+    if (serviceMap.remove(serviceId) != null) {
+      log.debug("unregistered " + serviceId);
+    }
   }
 
   public static LineToken getToken(Properties properties) {
