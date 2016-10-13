@@ -10,14 +10,13 @@ import com.eyelinecom.whoisd.sads2.connector.Session;
 import com.eyelinecom.whoisd.sads2.content.ContentRequestUtils;
 import com.eyelinecom.whoisd.sads2.content.ContentResponse;
 import com.eyelinecom.whoisd.sads2.content.attributes.AttributeReader;
+import com.eyelinecom.whoisd.sads2.content.attributes.AttributeSet;
 import com.eyelinecom.whoisd.sads2.exception.InterceptionException;
 import com.eyelinecom.whoisd.sads2.executors.connector.SADSExecutor;
 import com.eyelinecom.whoisd.sads2.interceptor.BlankInterceptor;
 import com.eyelinecom.whoisd.sads2.line.registry.LineServiceRegistry;
 import com.eyelinecom.whoisd.sads2.line.registry.LineToken;
 import com.eyelinecom.whoisd.sads2.line.resource.LineApi;
-import com.eyelinecom.whoisd.sads2.session.ServiceSessionManager;
-import com.eyelinecom.whoisd.sads2.session.SessionManager;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.text.translate.AggregateTranslator;
@@ -45,7 +44,6 @@ public class LinePushInterceptor extends BlankInterceptor implements Initable {
 
   private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(LinePushInterceptor.class);
   private LineApi client;
-  private ServiceSessionManager sessionManager;
 
   private static final CharSequenceTranslator ESCAPE_VK =
       new AggregateTranslator(
@@ -70,7 +68,6 @@ public class LinePushInterceptor extends BlankInterceptor implements Initable {
       if (isNotBlank(request.getParameters().get("sadsSmsMessage"))) {
         // TODO
       } else {
-        final String serviceId = request.getServiceId();
         final Document doc = (Document) response.getAttributes().get(PageBuilder.VALUE_DOCUMENT);
         final String keyboard = getKeyboard(doc);
 
@@ -79,12 +76,19 @@ public class LinePushInterceptor extends BlankInterceptor implements Initable {
         final boolean isNothingToSend = StringUtils.isBlank(text) && keyboard == null;
         if (!isNothingToSend) text = text.isEmpty() ? "." : text;
 
-        final boolean shouldCloseSession =
-            keyboard == null && doc.getRootElement().elements("input").isEmpty() &&
-                !getAttributes(doc.getRootElement()).getBoolean("line.keep.session").or(false);
+        final boolean shouldCloseSession;
+        {
+          if (keyboard != null || !doc.getRootElement().elements("input").isEmpty()) {
+            shouldCloseSession = false;
 
-        final SessionManager sessionManager =
-          this.sessionManager.getSessionManager(request.getProtocol(), serviceId);
+          } else {
+            final AttributeSet pageAttributes = getAttributes(doc.getRootElement());
+            shouldCloseSession = !pageAttributes.getBoolean("line.keep.session")
+                .or(pageAttributes.getBoolean("keep.session"))
+                .or(false);
+          }
+        }
+
         final Session session = request.getSession();
 
         if (!shouldCloseSession) {
@@ -165,8 +169,7 @@ public class LinePushInterceptor extends BlankInterceptor implements Initable {
 
   @Override
   public void init(Properties config) throws Exception {
-    client = (LineApi) SADSInitUtils.getResource("client", config);
-    sessionManager = (ServiceSessionManager) SADSInitUtils.getResource("session-manager", config);
+    client = SADSInitUtils.getResource("client", config);
   }
 
   @Override
